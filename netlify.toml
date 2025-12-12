@@ -1,13 +1,13 @@
-# === Cấu hình Cho phép truy cập và fix lỗi 404 (SPA Routing) ===
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-# === Cấu hình Bảo vệ bằng Mật khẩu (Basic Auth) - Sử dụng Biến môi trường ===
+# Quy tắc 1 (Ưu tiên): BẢO VỆ BẰNG MẬT KHẨU
 [[redirects]]
   from = "/*"
   to = "/*"
   status = 401
   force = true
   headers = {Authorization = ["Basic " + ENV.BASIC_AUTH_SECRET]}
+
+# Quy tắc 2: FIX LỖI 404 SAU KHI ĐĂNG NHẬP
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
