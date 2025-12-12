@@ -1,0 +1,1475 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Radio Hoàng</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.5/dist/hls.min.js"></script>
+
+<style>
+    /* ========================= THEME VARIABLES ========================= */
+    :root {
+        /* Default - Light Theme */
+        --bg-body: #eff1f5;
+        --text-color: #333;
+        --text-muted: #6c757d;
+        --primary-color: #4e73df;
+        --secondary-bg: #f8f9fa;
+        --card-bg: #ffffff;
+        --ticker-bg: #e6f7ff;
+        --ticker-color: #007bff;
+        --shadow: 0 4px 15px rgba(0,0,0,0.05);
+        --radius: 16px;
+    }
+
+    /* Dark Theme */
+    body[data-theme="dark"] {
+        --bg-body: #121212;
+        --text-color: #e0e0e0;
+        --text-muted: #a0a0a0;
+        --primary-color: #bb86fc; /* Purple accent */
+        --secondary-bg: #242424;
+        --card-bg: #1e1e1e;
+        --ticker-bg: #333333;
+        --ticker-color: #bb86fc;
+        --shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    /* Retro Theme (Sepia) */
+    body[data-theme="retro"] {
+        --bg-body: #f1e5d7;
+        --text-color: #5c4033;
+        --text-muted: #8d7a6e;
+        --primary-color: #a0522d; /* Sienna */
+        --secondary-bg: #fdf8f0;
+        --card-bg: #ffffff;
+        --ticker-bg: #fbebd7;
+        --ticker-color: #996515;
+        --shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    /* Neon Theme */
+    body[data-theme="neon"] {
+        --bg-body: #111111;
+        --text-color: #00ff00; /* Neon green text */
+        --text-muted: #009900;
+        --primary-color: #00ffff; /* Neon cyan */
+        --secondary-bg: #222222;
+        --card-bg: #000000;
+        --ticker-bg: #330033;
+        --ticker-color: #cc00ff; /* Neon magenta */
+        --shadow: 0 0 10px rgba(0,255,255,0.8), 0 0 20px rgba(0,255,255,0.5);
+    }
+    
+    /* Global Styles use variables */
+    body {
+        background-color: var(--bg-body);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: var(--text-color);
+        padding-bottom: 80px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+    
+    /* Force Bootstrap text-muted and other text colors to follow theme */
+    .text-muted, .small.text-muted, .text-secondary {
+        color: var(--text-muted) !important;
+    }
+    .text-primary {
+        color: var(--primary-color) !important;
+    }
+    .text-dark {
+        color: var(--text-color) !important;
+    }
+
+
+    /* --- STICKY HEADER --- */
+    .sticky-header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: var(--card-bg);
+        backdrop-filter: blur(5px);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 10px 15px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--secondary-bg);
+    }
+
+    /* --- MARQUEE --- */
+    .welcome-ticker {
+        background-color: var(--ticker-bg); 
+        color: var(--ticker-color); 
+        padding: 8px 10px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border: 1px solid var(--ticker-color);
+        font-size: 0.9rem;
+        font-weight: 500;
+        overflow: hidden;
+    }
+
+    /* Card Styling */
+    .app-card {
+        background: var(--card-bg);
+        border: none;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    
+    .channel-card {
+        padding: 20px;
+        position: relative;
+    }
+
+    /* NEW FLEX FOR HEADER AND REVISED BADGE POSITIONING */
+    .channel-header {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .channel-name {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--text-color);
+    }
+
+    /* --- CONTROLS --- */
+    .control-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .btn-action {
+        border-radius: 12px;
+        font-weight: 600;
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: center;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+    
+    .btn-play-main { 
+        flex-grow: 0; 
+        width: 35%;
+        min-width: 110px;
+    }
+    
+    .btn-rec-main { 
+        flex-grow: 0; 
+        width: auto;
+        min-width: 100px;
+    }
+
+    /* Scheduler Section */
+    .scheduler-box {
+        background: var(--secondary-bg);
+        border-radius: 12px;
+        padding: 12px;
+        margin-top: 10px;
+        border: 1px solid var(--text-muted);
+    }
+
+    .scheduler-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .scheduler-row:last-child { margin-bottom: 0; }
+
+    .form-control-custom {
+        border-radius: 8px;
+        border: 1px solid var(--text-muted);
+        font-size: 0.9rem;
+        background-color: var(--card-bg);
+        color: var(--text-color);
+    }
+
+    /* Badges (UPDATED) */
+    .badge-live { 
+        background-color: #dc3545;
+        color: white;
+        padding: 6px 14px; 
+        border-radius: 12px; 
+        font-size: 1rem; 
+        font-weight: 700;
+        animation: pulse 2s infinite;
+        line-height: 1; 
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4); 
+    }
+
+    .badge-rec { 
+        background-color: #e74a3b;
+        color: white;
+        padding: 6px 14px; 
+        border-radius: 12px; 
+        font-size: 1rem; 
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        line-height: 1;
+        box-shadow: 0 4px 8px rgba(231, 74, 59, 0.4);
+    }
+    
+    body[data-theme="neon"] .badge-live, body[data-theme="neon"] .badge-rec {
+        box-shadow: 0 0 10px var(--primary-color);
+        background-color: var(--primary-color);
+        color: var(--bg-body);
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.6; }
+        100% { opacity: 1; }
+    }
+
+    /* Library Items */
+    .file-item {
+        padding: 12px;
+        border-bottom: 1px solid var(--secondary-bg);
+    }
+    .file-item:last-child { border-bottom: none; }
+    
+    .file-actions {
+        display: flex;
+        gap: 5px;
+        margin-top: 8px;
+        overflow-x: auto;
+    }
+
+    /* Uploader */
+    .uploader-area {
+        border: 2px dashed var(--primary-color);
+        background: var(--secondary-bg);
+        border-radius: var(--radius);
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        color: var(--primary-color);
+    }
+
+    /* Player Box (Active) - Updated for multi-player */
+    .active-player-box {
+        background: var(--secondary-bg);
+        color: var(--text-color);
+        border-radius: var(--radius);
+        padding: 15px;
+        margin-bottom: 10px; 
+        border: 1px solid var(--primary-color);
+    }
+    .active-player-box audio {
+        width: 100%;
+        margin-top: 10px;
+        height: 30px;
+    }
+
+    .log-box {
+        font-family: monospace;
+        font-size: 0.8rem;
+        background: var(--card-bg);
+        color: var(--text-muted);
+        padding: 10px;
+        border-radius: 8px;
+        max-height: 120px;
+        overflow-y: auto;
+        border: 1px solid var(--secondary-bg);
+    }
+</style>
+</head>
+
+<body data-theme="light">
+
+<div class="sticky-header d-flex justify-content-between align-items-center">
+    <div>
+        <h5 class="m-0 fw-bold text-primary"><i class="bi bi-broadcast"></i> Radio Pro</h5>
+        <small class="text-muted" style="font-size: 11px;">Max 3 Channels • Hẹn giờ đa kênh</small>
+    </div>
+    
+    <div id="currentTimeDisplay" class="text-center d-none d-sm-block">
+        <div class="fw-bold small text-primary" id="currentDate"></div>
+        <div class="small text-muted" id="currentTime"></div>
+    </div>
+    
+    <div class="d-flex align-items-center gap-2">
+        <select id="themeSelector" class="form-select form-select-sm" style="width: 120px;" onchange="setTheme(this.value)">
+            <option value="light">☀️ Light</option>
+            <option value="dark">🌙 Dark</option>
+            <option value="retro">📻 Retro</option>
+            <option value="neon">👾 Neon</option>
+        </select>
+        <span class="badge bg-light text-dark border"><i class="bi bi-music-note-list"></i> <span id="totalFilesBadge">0</span></span>
+        <span class="badge bg-light text-danger border"><i class="bi bi-mic"></i> <span id="totalRecsBadge">0</span></span>
+    </div>
+</div>
+
+<div class="container-fluid px-3">
+    <div class="welcome-ticker">
+        <marquee direction="left" scrollamount="5">
+            ⚡Bật tần số Radio Hoàng – nơi mọi giai điệu đều là siêu năng lượng!.
+        </marquee>
+    </div>
+    <div class="row">
+        <div class="col-lg-7 mb-4">
+            <h6 class="text-uppercase text-muted fw-bold small mb-3">Danh sách kênh</h6>
+            <div class="mb-3">
+                <input type="text" id="channelSearch" class="form-control form-control-custom" placeholder="Tìm kiếm kênh..." onkeyup="filterChannels()">
+            </div>
+            <div id="channels"></div>
+            </div>
+
+        <div class="col-lg-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-uppercase text-muted fw-bold small m-0">Các kênh đang phát <span class="badge bg-secondary" id="activeChannelCount">0</span></h6>
+                <button class="btn btn-sm btn-outline-danger" id="closeAllChannelsBtn" style="display:none;" onclick="closeAllChannels()">
+                    <i class="bi bi-x-circle"></i> Đóng tất cả
+                </button>
+            </div>
+            <div id="player-area">
+                <div class="text-center text-muted p-5 border rounded" style="background-color: var(--secondary-bg);">
+                    <i class="bi bi-headset display-4 mb-2"></i>
+                    <p class="mb-0">Chưa có kênh nào đang phát.</p>
+                </div>
+            </div>
+
+            <div class="app-card">
+                <div class="card-header bg-transparent border-bottom-0 pt-3 pb-0">
+                    <h6 class="fw-bold text-dark"><i class="bi bi-mic-fill text-danger"></i> File đã ghi âm / Tải lên</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="p-3 pb-0">
+                        <input type="text" id="fileSearch" class="form-control form-control-custom" placeholder="Tìm kiếm file ghi âm/tải lên..." onkeyup="refreshLibraryAndRecordings()">
+                    </div>
+                    <div id="bulkActionBar" class="p-3 d-flex gap-2" style="display:none !important; background-color: var(--secondary-bg);">
+                        <button class="btn btn-sm btn-danger flex-grow-1" onclick="bulkDeleteFiles()"><i class="bi bi-trash"></i> Xóa (<span id="selectedCount">0</span>)</button>
+                        <button class="btn btn-sm btn-success flex-grow-1" onclick="bulkDownloadFiles()"><i class="bi bi-download"></i> Tải xuống đã chọn</button>
+                    </div>
+                    <div id="recordings"></div>
+                    <div class="p-3 text-center text-muted small" id="emptyRecNote" style="display:none">Chưa có file ghi âm nào</div>
+                </div>
+            </div>
+            
+            <div class="app-card p-3 mt-4">
+                <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-cloud-arrow-up"></i> Thêm nguồn phát (Tải lên)</h6>
+                <div class="uploader-area" onclick="document.getElementById('fileInput').click()">
+                    <i class="bi bi-music-note-beamed display-6"></i>
+                    <div class="mt-2 fw-bold">Chạm để chọn file</div>
+                    <div class="small opacity-75">Hỗ trợ mp3, m4a, webm (File được lưu vào mục "File đã ghi âm")</div>
+                    <input id="fileInput" type="file" accept="audio/*" hidden />
+                </div>
+                <h6 class="fw-bold mt-4 mb-2 text-dark">Thư viện nguồn (Chỉ file cũ)</h6>
+                <div id="library" class="list-group list-group-flush border rounded" style="border-color: var(--secondary-bg) !important;"></div>
+            </div>
+            
+            <div class="app-card p-3">
+                <h6 class="fw-bold mb-2 small text-uppercase text-dark">Nhật ký hoạt động</h6>
+                <div id="log" class="log-box"></div>
+            </div>
+            
+            <div class="app-card p-3 mt-4">
+                <h6 class="fw-bold mb-3 small text-uppercase text-dark">
+                    <i class="bi bi-calendar-event me-2 text-primary"></i> Lịch Phát Sóng (VOV GT)
+                </h6>
+                <div class="table-responsive">
+                    <table class="table table-sm small mb-0" style="color: var(--text-color);">
+                        <thead class="fw-bold">
+                            <tr style="background-color: var(--secondary-bg);">
+                                <th class="p-2" style="width: 35%;">Giờ Phát</th>
+                                <th class="p-2">Chương Trình</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="p-2 fw-bold">04:00 - 05:30</td>
+                                <td class="p-2">Nhạc Việt Nam</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 fw-bold">05:30 - 06:30</td>
+                                <td class="p-2">Nhạc quốc tế</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 fw-bold text-danger">06:30 - 08:15</td>
+                                <td class="p-2 text-danger">GIỜ CAO ĐIỂM SÁNG</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 fw-bold">08:15 - 09:15</td>
+                                <td class="p-2">GIỜ CAO ĐIỂM SÁNG</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 fw-bold">09:15 - 10:30</td>
+                                <td class="p-2">Đời sống thị thành</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 fw-bold text-danger">10:30 - 12:00</td>
+                            <td class="p-2 text-danger">GIỜ CAO ĐIỂM TRƯA</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 fw-bold">12:30 - 14:30</td>
+                                <td class="p-2">Ca nhạc: Nhà ga 91 - Trên mọi nẻo đường</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 fw-bold">14:30 - 16:30</td>
+                                <td class="p-2">FM91 - Buổi chiều</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 fw-bold text-danger">16:30 - 19:40</td>
+                                <td class="p-2 text-danger">GIỜ CAO ĐIỂM CHIỀU</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 fw-bold">19:40 - 20:00</td>
+                                <td class="p-2">FM Bất động sản</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 fw-bold">20:00 - 21:30</td>
+                                <td class="p-2">Kết nối yêu thương - nhập sóng - HN</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 fw-bold">21:30 - 23:00</td>
+                                <td class="p-2">Đường tin 91 - Đường Khuya</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-2 small text-muted fst-italic text-center border-top pt-2" style="border-color: var(--secondary-bg) !important;">
+                    <i class="bi bi-info-circle"></i> Lịch phát sóng có thể thay đổi không báo trước.
+                </div>
+            </div>
+            </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/* ======================= CẤU HÌNH KÊNH (Cập nhật danh sách mới) ======================= */
+const fixedChannels = [
+    // VOV
+    { id: 'vov_gt_hn', category: 'VOV', name: "VOV GT Hà Nội", url: "https://play.vovgiaothong.vn/live/gthn/playlist.m3u8" },
+    { id: 'vov_gt_hcm', category: 'VOV', name: "VOV GT TP.HCM", url: "https://play.vovgiaothong.vn/live/gthcm/playlist.m3u8" },
+    { id: 'vov_mekong', category: 'VOV', name: "Mekong 90MHz", url: "https://play.vovgiaothong.vn/live/mekong/playlist.m3u8" },
+    { id: 'vov_duyenhai', category: 'VOV', name: "Duyên Hải FM", url: "https://play.vovgiaothong.vn/live/duyenhai/playlist.m3u8" },
+    { id: 'vov_1', category: 'VOV', name: "VOV1 Thời sự", url: "https://str.vov.gov.vn/vovlive/vov1vov5Vietnamese.sdp_aac/chunklist_w1635058943.m3u8" },
+    { id: 'vov_2', category: 'VOV', name: "VOV2 Văn hóa", url: "https://str.vov.gov.vn/vovlive/vov2.sdp_aac/chunklist_w610145337.m3u8" },
+    { id: 'vov_3', category: 'VOV', name: "VOV3 Ca nhạc", url: "https://str.vov.gov.vn/vovlive/vov3.sdp_aac/chunklist_w765784949.m3u8" },
+    // VOH
+    { id: 'voh_mekong', category: 'VOH', name: "VOH - Mekong FM92-92.5", url: "https://strm.voh.com.vn/radio/channel6/chunklist_w621496676.m3u8" },
+    { id: 'voh_fm999', category: 'VOH', name: "VOH FM99.9 (Tin tức)", url: "https://strm.voh.com.vn/radio/channel3/chunklist_w1192659743.m3u8" },
+    { id: 'voh_fm956', category: 'VOH', name: "VOH FM95.6 (Giải trí)", url: "https://strm.voh.com.vn/radio/channel1/chunklist_w2130794908.m3u8" },
+    { id: 'voh_fm877', category: 'VOH', name: "VOH FM87.7", url: "https://strm.voh.com.vn/radio/channel5/chunklist_w901087032.m3u8" },
+    { id: 'voh_am610', category: 'VOH', name: "VOH AM610", url: "https://strm.voh.com.vn/radio/channel2/chunklist_w1503938461.m3u8" },
+    // HANOI
+    { id: 'hn_96', category: 'HANOI', name: "Hà Nội FM96", url: "http://222.252.21.96:8000/HANOI96" },
+    { id: 'hn_90', category: 'HANOI', name: "Hà Nội FM90", url: "http://14.162.146.90:8000/HANOI90" }
+];
+
+
+/* ======================= DATABASE & LOGIC ======================= */
+const DB_NAME = 'radio_modern_db';
+const STORE = 'recordings';
+let dbp = null;
+
+// IndexedDB Helper (Unchanged)
+async function openDB(){
+  return new Promise((res,rej)=>{
+    const r = indexedDB.open(DB_NAME,1);
+    r.onupgradeneeded = ()=> {
+      const db = r.result;
+      if(!db.objectStoreNames.contains(STORE)){
+        db.createObjectStore(STORE,{keyPath:'id'});
+      }
+    };
+    r.onsuccess = ()=> res(r.result);
+    r.onerror = ()=> rej(r.error);
+  });
+}
+async function putRec(obj){
+  if(!dbp) dbp = await openDB();
+  return new Promise((res,rej)=>{
+    const tx = dbp.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).put(obj);
+    tx.oncomplete = ()=> res();
+    tx.onerror = ()=> rej(tx.error);
+  });
+}
+async function getAllRecs(){
+  if(!dbp) dbp = await openDB();
+  return new Promise((res,rej)=>{
+    const tx = dbp.transaction(STORE,'readonly');
+    const req = tx.objectStore(STORE).getAll();
+    req.onsuccess = ()=> res(req.result);
+    req.onerror = ()=> rej(req.error);
+  });
+}
+async function deleteRec(id){
+  if(!dbp) dbp = await openDB();
+  return new Promise((res,rej)=>{
+    const tx = dbp.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).delete(id);
+    tx.oncomplete = ()=> res();
+    tx.onerror = ()=> rej(tx.error);
+  });
+}
+
+// Global Vars
+const players = {}; // Key is now channel.id or lib_channel.id_libid
+const channelsEl = document.getElementById('channels');
+const libraryEl = document.getElementById('library');
+const recordingsEl = document.getElementById('recordings');
+const playerArea = document.getElementById('player-area');
+const logEl = document.getElementById('log');
+const fileInput = document.getElementById('fileInput');
+const totalFilesBadge = document.getElementById('totalFilesBadge');
+const totalRecsBadge = document.getElementById('totalRecsBadge');
+const activeChannelCount = document.getElementById('activeChannelCount'); // New
+const closeAllChannelsBtn = document.getElementById('closeAllChannelsBtn'); // NEW
+
+const fileSearchInput = document.getElementById('fileSearch');
+const channelSearchInput = document.getElementById('channelSearch');
+const bulkActionBar = document.getElementById('bulkActionBar');
+const selectedCountSpan = document.getElementById('selectedCount');
+let selectedFiles = []; // Array to store IDs of selected files
+
+function log(msg){
+  const t = new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  const d = document.createElement('div');
+  d.innerHTML = `<span style="opacity:0.6">[${t}]</span> ${msg}`;
+  logEl.prepend(d);
+}
+
+// === NEW FUNCTION: CLOSE ALL CHANNELS ===
+function closeAllChannels(){
+    if(!confirm("Bạn chắc chắn muốn đóng TẤT CẢ kênh đang phát?")) return;
+    
+    log("Đang đóng tất cả các kênh đang phát...");
+    
+    // Lấy tất cả keys hiện tại để tránh lỗi lặp khi xóa
+    const keysToStop = Object.keys(players);
+    
+    keysToStop.forEach(key => {
+        const p = players[key];
+        
+        // 1. Dừng và xóa player (stopChannel đã xử lý dừng ghi âm và audio)
+        stopChannel(key); 
+        
+        // 2. Reset UI của thẻ kênh tương ứng (chỉ áp dụng cho kênh live và không phải file playback)
+        if(key !== 'file_playback_unique' && !p?.libId){ 
+             const stopBtn = document.getElementById(`stop_${key}`);
+             // Kích hoạt sự kiện tắt để reset UI thẻ kênh (ẩn stop, hiện play, xóa badge)
+             if(stopBtn) stopBtn.click(); 
+        }
+    });
+    
+    // updateActiveChannelsUI() được gọi bên trong stopChannel, nhưng gọi lại để chắc chắn
+    updateActiveChannelsUI(); 
+    log("Đã đóng tất cả kênh.");
+}
+// Expose to window for HTML onclick
+window.closeAllChannels = closeAllChannels;
+// === END CLOSE ALL CHANNELS ===
+
+
+// === THEME SWITCHING LOGIC ===
+function setTheme(themeName) {
+    document.body.setAttribute('data-theme', themeName);
+    localStorage.setItem('theme', themeName);
+    
+    // Update sticky header badge colors dynamically
+    const theme = document.body.getAttribute('data-theme');
+    const isDark = (theme === 'dark' || theme === 'neon');
+    
+    const badge1 = document.querySelector('.sticky-header .badge:nth-child(2)');
+    const badge2 = document.querySelector('.sticky-header .badge:nth-child(3)');
+
+    if (badge1 && badge2) {
+        if (isDark) {
+            badge1.className = 'badge bg-secondary text-light border';
+            badge2.className = 'badge bg-secondary text-danger border';
+        } else {
+            badge1.className = 'badge bg-light text-dark border';
+            badge2.className = 'badge bg-light text-danger border';
+        }
+    }
+}
+window.setTheme = setTheme; // Expose to HTML
+
+// === NEW BULK ACTION FUNCTIONS (Unchanged) ===
+function toggleFileSelection(id, isChecked){
+    if(isChecked){
+        if(!selectedFiles.includes(id)) selectedFiles.push(id);
+    } else {
+        selectedFiles = selectedFiles.filter(fid => fid !== id);
+    }
+    
+    selectedCountSpan.textContent = selectedFiles.length;
+    if(selectedFiles.length > 0){
+        bulkActionBar.style.display = 'flex';
+    } else {
+        bulkActionBar.style.display = 'none';
+    }
+}
+
+async function bulkDeleteFiles(){
+    if(selectedFiles.length === 0) return;
+    if(!confirm(`Bạn chắc chắn muốn xóa ${selectedFiles.length} file đã chọn?`)) return;
+
+    log(`Đang xóa ${selectedFiles.length} file...`);
+    const filesToDelete = [...selectedFiles]; 
+    selectedFiles = []; 
+    toggleFileSelection('dummy', false); 
+
+    for(const id of filesToDelete){
+        await deleteRec(id);
+    }
+    log(`Đã xóa thành công các file đã chọn.`);
+    await refreshLibraryAndRecordings();
+}
+
+async function bulkDownloadFiles(){
+    if(selectedFiles.length === 0) return;
+    log(`Đang chuẩn bị tải xuống ${selectedFiles.length} file...`);
+    
+    const allRecs = await getAllRecs();
+    
+    for(const id of selectedFiles){
+        const r = allRecs.find(x=>x.id==id);
+        if(r){
+            const url = URL.createObjectURL(r.blob);
+            const a = document.createElement('a');
+            a.href = url; 
+            const name = r.name.endsWith('.webm') || r.name.endsWith('.mp3') || r.name.endsWith('.m4a') ? r.name : `${r.name}.webm`;
+            a.download = name; 
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 100); 
+        }
+    }
+    log(`Đã bắt đầu tải xuống các file đã chọn.`);
+}
+// === END NEW BULK ACTION FUNCTIONS ===
+
+// === CHANNEL SEARCH FUNCTION (Unchanged) ===
+function filterChannels(){
+    const query = channelSearchInput.value.toLowerCase().trim();
+    const allChannelCards = document.querySelectorAll("#channels > .app-card");
+    
+    allChannelCards.forEach(card => {
+        const channelNameEl = card.querySelector('.channel-name');
+        // Sử dụng data-channel-name (được đặt khi render) để tìm kiếm
+        const name = card.getAttribute('data-channel-name').toLowerCase(); 
+        if (name.includes(query)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+// === END CHANNEL SEARCH FUNCTION ===
+
+function updateActiveChannelsUI(){
+    // Loại trừ 'file_playback_unique' khỏi số kênh đang phát trực tiếp
+    const count = Object.keys(players).filter(k=>k!=='file_playback_unique').length;
+    activeChannelCount.textContent = count;
+    
+    // Logic hiển thị/ẩn nút "Đóng tất cả" (NEW)
+    if (closeAllChannelsBtn) {
+        if (Object.keys(players).length > 0) { // Kiểm tra tổng số players
+            closeAllChannelsBtn.style.display = 'block';
+        } else {
+            closeAllChannelsBtn.style.display = 'none';
+        }
+    }
+    
+    const emptyNote = playerArea.querySelector('.text-center.text-muted');
+    if(Object.keys(players).length === 0){ // Kiểm tra tổng số players (kể cả file)
+        if(!emptyNote){
+            playerArea.innerHTML = `
+                <div class="text-center text-muted p-5 border rounded" style="background-color: var(--secondary-bg);">
+                    <i class="bi bi-headset display-4 mb-2"></i>
+                    <p class="mb-0">Chưa có kênh nào đang phát.</p>
+                </div>
+            `;
+        }
+    } else {
+        if(emptyNote) emptyNote.remove();
+    }
+}
+
+
+/* ======================= RENDER GIAO DIỆN KÊNH (REVISED: use ch.id) ======================= */
+fixedChannels.forEach((ch)=>{
+  const key = ch.id; // Sử dụng ID duy nhất làm key
+  const div = document.createElement('div');
+  div.className = "app-card channel-card";
+  div.setAttribute('data-channel-name', ch.name);
+
+  // HTML Layout cho từng thẻ kênh - Đã cập nhật .channel-header
+  div.innerHTML = `
+    <div class="channel-header">
+      <div class="channel-name">
+        <i class="bi bi-broadcast text-primary me-2"></i>${ch.name}
+      </div>
+      <div id="liveBadge_${key}"></div>
+    </div>
+
+    <div class="control-group">
+      <button class="btn btn-primary btn-action btn-play-main shadow-sm" id="play_${key}">
+        <i class="bi bi-play-fill fs-5"></i> BẬT
+      </button>
+      <button class="btn btn-dark btn-action btn-play-main shadow-sm" id="stop_${key}" disabled style="display:none;">
+        <i class="bi bi-stop-fill fs-5"></i> TẮT
+      </button>
+      
+      <button class="btn btn-outline-danger btn-action btn-rec-main" id="rec_${key}">
+        <i class="bi bi-mic"></i> Ghi âm
+      </button>
+    </div>
+
+    <div class="accordion accordion-flush" id="acc_${key}">
+      <div class="accordion-item bg-transparent border-0">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed py-2 px-0 bg-transparent shadow-none small fw-bold text-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#tools_${key}">
+            <i class="bi bi-gear-wide-connected me-2"></i> Cài đặt & Hẹn giờ
+          </button>
+        </h2>
+        <div id="tools_${key}" class="accordion-collapse collapse" data-bs-parent="#acc_${key}">
+          <div class="scheduler-box">
+             <div class="mb-2">
+                <label class="small text-muted">Nguồn phát thay thế (chỉ file "lib_" cũ)</label>
+                <select class="form-select form-select-sm form-control-custom" id="sel_${key}">
+                    <option value="">Mặc định (Live Stream)</option>
+                </select>
+             </div>
+
+             <div class="scheduler-row">
+                <input type="number" class="form-control form-control-sm form-control-custom" id="sched_${key}" placeholder="Phút" min="1" style="width:70px">
+                <button class="btn btn-sm btn-outline-dark flex-grow-1" id="schedbtn_${key}">
+                    <i class="bi bi-hourglass-bottom"></i> Hẹn giờ tắt (Tự động ghi âm)
+                </button>
+             </div>
+             
+             <div class="scheduler-row mt-2">
+                <input type="time" class="form-control form-control-sm form-control-custom" id="startat_${key}">
+                <button class="btn btn-sm btn-outline-success flex-grow-1" id="startatbtn_${key}">
+                    <i class="bi bi-alarm"></i> Hẹn giờ bật & Ghi âm
+                </button>
+             </div>
+
+             <div class="scheduler-row mt-2">
+                <input type="number" class="form-control form-control-sm form-control-custom" id="stopafter_${key}" placeholder="Phút" min="1" style="width:70px">
+                <button class="btn btn-sm btn-outline-danger flex-grow-1" id="stopafterbtn_${key}">
+                    <i class="bi bi-stop-circle"></i> Tắt ghi sau
+                </button>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="channelTimer_${key}" class="mt-2 text-center"></div>
+  `;
+  channelsEl.appendChild(div);
+
+  // Gán sự kiện
+  const playBtn = div.querySelector(`#play_${key}`);
+  const stopBtn = div.querySelector(`#stop_${key}`);
+  const recBtn = div.querySelector(`#rec_${key}`);
+  const sel = div.querySelector(`#sel_${key}`);
+  
+  const schedInput = div.querySelector(`#sched_${key}`);
+  const schedBtn = div.querySelector(`#schedbtn_${key}`);
+  
+  const startAtInput = div.querySelector(`#startat_${key}`);
+  const startAtBtn = div.querySelector(`#startatbtn_${key}`);
+  
+  const stopAfterInput = div.querySelector(`#stopafter_${key}`);
+  const stopAfterBtn = div.querySelector(`#stopafterbtn_${key}`);
+  
+  const liveBadgeEl = div.querySelector(`#liveBadge_${key}`);
+  const channelTimerEl = div.querySelector(`#channelTimer_${key}`);
+
+  function setLiveBadge(html){ liveBadgeEl.innerHTML = html || ""; }
+  
+  function updatePlayStopUI(isPlaying){
+      if(isPlaying){
+          playBtn.style.display = 'none';
+          stopBtn.style.display = 'flex'; 
+          stopBtn.disabled = false;
+      } else {
+          playBtn.style.display = 'flex';
+          stopBtn.style.display = 'none';
+          playBtn.disabled = false;
+      }
+      // Đảm bảo nút ghi âm được reset nếu bị tắt thủ công và chưa ghi
+      const p = players[key];
+      if(!isPlaying && !p?.isRecording){
+          recBtn.innerHTML = '<i class="bi bi-mic"></i> Ghi âm';
+          recBtn.classList.remove('btn-danger');
+          recBtn.classList.add('btn-outline-danger');
+          setLiveBadge("");
+      } else if(p?.isRecording) {
+          // Nếu tắt kênh nhưng vẫn đang ghi, trạng thái vẫn là REC
+          setLiveBadge(`<span class="badge-rec"><i class="bi bi-record-circle"></i> REC</span>`);
+      }
+  }
+
+  // === PLAY ===
+  playBtn.onclick = async ()=>{
+    try{
+      await startPlayingChannel(ch); // Sử dụng ch object
+      updatePlayStopUI(true);
+      log(`Đã bật: ${ch.name}`);
+      // SỬ DỤNG CLASS CẬP NHẬT
+      setLiveBadge(`<span class="badge-live">LIVE</span>`);
+    }catch(e){
+      alert("Lỗi phát: "+e);
+      console.error(e);
+    }
+  };
+
+  // === STOP ===
+  stopBtn.onclick = ()=>{
+    stopChannel(key); // Sử dụng key
+    updatePlayStopUI(false);
+    log(`Đã tắt: ${ch.name}`);
+    setLiveBadge("");
+  };
+
+  // === RECORD ===
+  recBtn.onclick = async()=>{
+    const p = players[key];
+    if(p && p.isRecording){
+      await stopRecording(key);
+      recBtn.innerHTML = '<i class="bi bi-mic"></i> Ghi âm';
+      recBtn.classList.remove('btn-danger');
+      recBtn.classList.add('btn-outline-danger');
+      log(`Dừng ghi: ${ch.name}`);
+       if(p.audio && !p.audio.paused){
+          setLiveBadge(`<span class="badge-live">LIVE</span>`);
+       } else {
+          setLiveBadge("");
+       }
+    } else {
+      // Nếu chưa phát, bật kênh và ghi âm
+      if(!(p && p.audio && !p.audio.paused)){
+        await startPlayingChannel(ch);
+        updatePlayStopUI(true);
+      }
+      
+      const ok = await startRecording(key, ch.name, { uiBadgeEl: channelTimerEl });
+      if(ok){
+        recBtn.innerHTML = '<i class="bi bi-stop-circle-fill"></i> Dừng ghi';
+        recBtn.classList.remove('btn-outline-danger');
+        recBtn.classList.add('btn-danger');
+        log(`Đang ghi âm: ${ch.name}`);
+        setLiveBadge(`<span class="badge-rec"><i class="bi bi-record-circle"></i> REC</span>`);
+      }
+    }
+  };
+  
+  // === ALTERNATE SOURCE SELECTOR ===
+  sel.onchange = async()=>{
+        const newLibId = sel.value || null;
+        // Tắt player hiện tại
+        stopChannel(key);
+        updatePlayStopUI(false);
+        
+        // Bật lại kênh với nguồn mới
+        if(newLibId){
+            // Tạo ID mới cho player là lib_CHID_LIBID
+            const newKey = `lib_${ch.id}_${newLibId}`;
+            if(players[newKey]){
+                 alert("Nguồn này đang được phát ở một Player khác!");
+            } else {
+                 await startPlayingChannel(ch, newLibId);
+                 // UI update happens inside startPlayingChannel
+            }
+        } else {
+             // Phát lại nguồn Live mặc định
+             await startPlayingChannel(ch);
+        }
+        updatePlayStopUI(true); // Update UI of this channel card (which now links to the new player)
+    };
+
+
+  // === SCHEDULER (Hẹn giờ tắt và Ghi âm) ===
+  schedBtn.onclick = async ()=>{
+    const m = parseFloat(schedInput.value);
+    if(!m || m<=0){ alert("Vui lòng nhập số phút"); return; }
+    
+    // 1. Bật kênh nếu chưa bật
+    if(!players[key] || !players[key].audio || players[key].audio.paused){
+        await startPlayingChannel(ch);
+        updatePlayStopUI(true);
+    }
+    
+    // 2. Bắt đầu ghi âm nếu chưa ghi
+    if(!players[key].isRecording){
+        const ok = await startRecording(key, ch.name, { uiBadgeEl: channelTimerEl });
+        if(ok){
+             recBtn.innerHTML = '<i class="bi bi-stop-circle-fill"></i> Dừng ghi';
+             recBtn.classList.remove('btn-outline-danger'); recBtn.classList.add('btn-danger');
+             setLiveBadge(`<span class="badge-rec"><i class="bi bi-record-circle"></i> REC</span>`);
+        } else { return; }
+    }
+    
+    log(`Hẹn giờ: Tắt & Dừng ghi ${ch.name} sau ${m} phút`);
+    
+    setTimeout(async ()=>{
+        if(players[key]?.isRecording){
+            await stopRecording(key);
+            stopChannel(key); 
+            updatePlayStopUI(false);
+            log(`Đã tắt theo hẹn giờ: ${ch.name}`);
+        }
+    }, m * 60000);
+  };
+
+  // === START AT (Hẹn giờ bật & Ghi âm) ===
+  startAtBtn.onclick = ()=>{
+    const t = startAtInput.value;
+    if(!t){ alert("Chọn giờ (HH:MM)"); return; }
+    const [hh,mm] = t.split(":").map(x=>parseInt(x,10));
+    const now = new Date();
+    let target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0, 0);
+    if(target <= now) target.setDate(target.getDate() + 1);
+    
+    const ms = target - now;
+    const duration = parseFloat(schedInput.value); 
+    
+    log(`Đã đặt lịch: Bật & Ghi ${ch.name} lúc ${target.toLocaleTimeString()}`);
+    alert(`Đã đặt lịch bật kênh ${ch.name} lúc ${target.toLocaleTimeString()}`);
+
+    setTimeout(async ()=>{
+        try{
+            // Đảm bảo không bật lại nếu kênh đó đang phát
+            if(players[key]) return; 
+            
+            await startPlayingChannel(ch);
+            
+            const p = players[key];
+            if(!p) return; 
+
+            const ok = await startRecording(key, ch.name, { uiBadgeEl: p.timerUiEl });
+            if(ok){
+                document.getElementById(`play_${key}`).style.display = 'none';
+                document.getElementById(`stop_${key}`).style.display = 'flex';
+                document.getElementById(`rec_${key}`).innerHTML = '<i class="bi bi-stop-circle-fill"></i> Dừng ghi';
+                document.getElementById(`rec_${key}`).classList.remove('btn-outline-danger');
+                document.getElementById(`rec_${key}`).classList.add('btn-danger');
+                document.getElementById(`liveBadge_${key}`).innerHTML = `<span class="badge-rec"><i class="bi bi-record-circle"></i> REC</span>`;
+                
+                log(`Tự động bật & ghi: ${ch.name}`);
+                
+                if(duration && duration > 0){
+                    setTimeout(async ()=>{
+                        if(players[key]?.isRecording){
+                            await stopRecording(key);
+                            stopChannel(key);
+                            document.getElementById(`stop_${key}`).click(); // Kích hoạt sự kiện tắt để reset UI
+                            log(`Tự động tắt: ${ch.name}`);
+                        }
+                    }, duration * 60000);
+                }
+            }
+        }catch(e){ console.error(e); }
+    }, ms);
+  };
+  
+  // === STOP AFTER (Chỉ tắt ghi âm) ===
+  stopAfterBtn.onclick = ()=>{
+     const m = parseFloat(stopAfterInput.value);
+     if(!m || m<=0){ alert("Nhập số phút"); return; }
+     
+     const p = players[key];
+     if(!p || !p.isRecording){
+        alert("Kênh này chưa được ghi âm!");
+        return;
+     }
+     log(`Sẽ dừng ghi âm ${ch.name} sau ${m} phút`);
+     setTimeout(async ()=>{
+         if(players[key]?.isRecording){
+             await stopRecording(key);
+             const recBtn = document.getElementById(`rec_${key}`);
+             if(recBtn) { recBtn.innerHTML = '<i class="bi bi-mic"></i> Ghi âm'; recBtn.classList.remove('btn-danger'); recBtn.classList.add('btn-outline-danger'); }
+             log(`Đã dừng ghi theo giờ: ${ch.name}`);
+             if(p.audio && !p.audio.paused) liveBadgeEl.innerHTML = `<span class="badge-live">LIVE</span>`;
+             else liveBadgeEl.innerHTML = ``;
+         }
+     }, m * 60000);
+  };
+});
+
+
+/* ======================= AUDIO PLAYER ENGINE (REVISED: use ch.id) ======================= */
+async function createAudioElementForSource(src){
+  const audio = document.createElement('audio');
+  audio.controls = true;
+  audio.autoplay = true;
+  audio.crossOrigin = 'anonymous';
+  
+  const isHls = src && src.includes(".m3u8");
+  if(isHls){
+    if(audio.canPlayType("application/vnd.apple.mpegurl")){
+      audio.src = src;
+    } else if(Hls.isSupported()){
+        const h = new Hls();
+        h.loadSource(src);
+        h.attachMedia(audio);
+        audio._hls = h;
+    } else {
+        audio.src = src;
+    }
+  } else {
+    audio.src = src;
+  }
+  return audio;
+}
+
+async function getLibrarySourceUrl(id){
+  if(!dbp) dbp = await openDB();
+  return new Promise((res)=>{
+    const tx = dbp.transaction(STORE,'readonly');
+    const r = tx.objectStore(STORE).get(id);
+    r.onsuccess = ()=> res(r.result ? URL.createObjectURL(r.result.blob) : null);
+    r.onerror = ()=> res(null);
+  });
+}
+
+// *** Đã cập nhật để sử dụng ch.id làm key ***
+async function startPlayingChannel(ch, libId = null){
+  const key = libId ? `lib_${ch.id}_${libId}` : ch.id;
+  
+  // 1. Kiểm tra xem kênh đã phát chưa
+  if(players[key] && players[key].audio && !players[key].audio.paused) return;
+
+  // 2. Kiểm tra giới hạn 3 kênh (chỉ áp dụng cho kênh Live, không tính player file)
+  const activePlayers = Object.keys(players).filter(k=>k!=='file_playback_unique').length; 
+  if(activePlayers >= 3){
+    alert("Bạn chỉ có thể bật tối đa 3 kênh cùng lúc để đảm bảo hiệu suất. Vui lòng tắt một kênh khác trước.");
+    return; // Chặn không cho bật kênh thứ 4
+  }
+
+  const src = libId ? await getLibrarySourceUrl(libId) : ch.url;
+  if(!src){ alert("Không tìm thấy nguồn"); return; }
+  
+  const displayName = libId ? `${ch.name} (Source: ${document.getElementById(`sel_${ch.id}`).options.item(document.getElementById(`sel_${ch.id}`).selectedIndex).textContent})` : ch.name;
+
+  const audio = await createAudioElementForSource(src);
+
+  // 3. Giao diện Player đang phát
+  const box = document.createElement('div');
+  box.className = "active-player-box shadow";
+  box.id = "player_box_"+key; // Dùng ID riêng cho box
+
+  const timerBadgeArea = document.getElementById(`channelTimer_${ch.id}`); // Lấy element từ thẻ kênh
+  
+  box.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <div class="fw-bold"><i class="bi bi-soundwave"></i> ${displayName}</div>
+            <div class="small opacity-50 text-light">Đang phát...</div>
+        </div>
+        <button class="btn btn-sm btn-outline-light rounded-pill px-3" id="p_close_${key}">Đóng</button>
+    </div>
+  `;
+  box.appendChild(audio);
+
+  // Thêm vào khu vực Player Area
+  playerArea.appendChild(box);
+  
+  // Nút đóng nhanh
+  document.getElementById(`p_close_${key}`).onclick = ()=>{
+      stopChannel(key); // Tắt Player theo key (ch.id hoặc lib_ch.id_libid)
+      
+      // Nếu là kênh live, cập nhật UI của thẻ kênh chính
+      if(!libId){
+          // Kiểm tra xem nút stop có tồn tại không trước khi click
+          const stopBtn = document.getElementById(`stop_${ch.id}`);
+          if(stopBtn) stopBtn.click(); // Kích hoạt sự kiện tắt để reset UI thẻ kênh
+      }
+      
+      updateActiveChannelsUI();
+  };
+
+  players[key] = {
+    audio, source: src, isRecording: false, chunks: [], mediaRecorder: null,
+    key, recordSeconds: 0, recordTimer: null, timerUiEl: timerBadgeArea, channel: ch, libId
+  };
+  
+  updateActiveChannelsUI();
+}
+
+function stopChannel(key){
+  const p = players[key];
+  if(!p) return;
+
+  if(p.isRecording){
+    try{ if(p.mediaRecorder && p.mediaRecorder.state !== "inactive") p.mediaRecorder.stop(); } catch(e){}
+  }
+  if(p.recordTimer){ clearInterval(p.recordTimer); p.recordTimer = null; }
+  if(p.audio){
+    if(p.audio._hls) p.audio._hls.destroy();
+    p.audio.pause();
+    if(p.audio.src.startsWith("blob:")) URL.revokeObjectURL(p.audio.src);
+  }
+  
+  const el = document.getElementById("player_box_"+key);
+  if(el) el.remove();
+  
+  // Xóa badge timer
+  if(p.timerUiEl) p.timerUiEl.innerHTML = '';
+  
+  delete players[key];
+  updateActiveChannelsUI();
+}
+
+/* ======================= RECORDING ENGINE (Unchanged) ======================= */
+function formatSec(s){
+  const mm = String(Math.floor(s/60)).padStart(2,'0');
+  const ss = String(s%60).padStart(2,'0');
+  return `${mm}:${ss}`;
+}
+
+async function startRecording(key,label, options = {}){
+  const p = players[key];
+  if(!p || !p.audio){ alert("Kênh chưa phát!"); return false; }
+
+  const audioEl = p.audio;
+  const cs = audioEl.captureStream || audioEl.mozCaptureStream;
+  if(!cs){ alert("Trình duyệt không hỗ trợ ghi âm trực tiếp."); return false; }
+
+  try{
+    const stream = cs.call(audioEl);
+    let mime = "audio/webm;codecs=opus";
+    if(!MediaRecorder.isTypeSupported(mime)) mime = "audio/webm";
+    
+    const mr = new MediaRecorder(stream, {mimeType: mime || ''});
+    p.chunks = [];
+    p.mediaRecorder = mr;
+    p.isRecording = true;
+    p.recordSeconds = 0;
+
+    const badgeTarget = options.uiBadgeEl || p.timerUiEl;
+    let timeDisplay = null;
+
+    if(badgeTarget){
+        badgeTarget.innerHTML = `<span class="badge bg-danger"><i class="bi bi-circle-fill small text-white blink"></i> REC <span id="time_${key}">00:00</span></span>`;
+        timeDisplay = badgeTarget.querySelector(`#time_${key}`);
+    }
+
+    mr.ondataavailable = e=>{ if(e.data.size > 0) p.chunks.push(e.data); };
+    mr.onstop = async ()=>{
+        if(p.recordTimer) clearInterval(p.recordTimer);
+        if(badgeTarget) badgeTarget.innerHTML = ""; 
+
+        const blob = new Blob(p.chunks, { type: mime || 'audio/webm' });
+        const id = "rec_"+Date.now();
+        const name = `${label} (${new Date().toLocaleTimeString().replace(/:/g,"-")})`;
+        await putRec({ id, name, note: "", created: Date.now(), blob });
+        log(`Đã lưu file: ${name}`);
+        await refreshLibraryAndRecordings();
+        p.isRecording = false;
+    };
+    mr.start();
+
+    p.recordTimer = setInterval(()=>{
+      p.recordSeconds++;
+      if(timeDisplay) timeDisplay.textContent = formatSec(p.recordSeconds);
+    }, 1000);
+
+    return true;
+  }catch(e){
+      console.error(e);
+      alert("Lỗi start record: "+e);
+      return false;
+  }
+}
+
+async function stopRecording(key){
+  const p = players[key];
+  if(!p || !p.mediaRecorder) return;
+  if(p.mediaRecorder.state !== "inactive") p.mediaRecorder.stop();
+  p.isRecording = false;
+}
+
+/* ======================= UTILS & FILE MANAGEMENT ======================= */
+// *** ĐÃ SỬA: Thay lib_ thành rec_ để file tải lên hiển thị ở mục File đã ghi âm / Tải lên ***
+fileInput.onchange = async(e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const id = "rec_"+Date.now();
+  await putRec({ id, name: f.name, note: "File tải lên", created: Date.now(), blob: f });
+  await refreshLibraryAndRecordings();
+  fileInput.value = "";
+  log(`Đã tải lên: ${f.name} (ID: ${id})`);
+};
+
+
+async function refreshLibraryDropdowns(){
+  const recs = await getAllRecs();
+  // Vẫn lấy file lib_ (file tải lên cũ) để làm nguồn thay thế (tương thích ngược)
+  const libFiles = recs.filter(r=>r.id.startsWith("lib_"));
+  
+  // Update dropdowns for all channel cards
+  document.querySelectorAll("#channels select").forEach(sel=>{
+    // Lấy key của kênh từ id của select (sel_vov_gt_hn)
+    const key = sel.id.replace('sel_', '');
+    
+    // Tìm player tương ứng
+    const p = players[key] || Object.values(players).find(player => player.channel.id === key && player.libId);
+    const cur = p?.libId || sel.value; 
+
+    sel.innerHTML = `<option value="">Mặc định (Live)</option>`;
+    libFiles.forEach(r=>{
+        const opt = document.createElement('option');
+        opt.value = r.id; opt.textContent = r.name;
+        sel.appendChild(opt);
+    });
+    sel.value = cur;
+  });
+}
+
+
+async function refreshLibraryAndRecordings(){
+  const recs = await getAllRecs();
+  const fileQuery = fileSearchInput.value.toLowerCase().trim();
+  
+  await refreshLibraryDropdowns(); // Update all dropdowns
+
+  // Filter Recs based on file search query (name or note)
+  const filteredRecs = recs.filter(r => 
+      (r.name.toLowerCase().includes(fileQuery) || (r.note || '').toLowerCase().includes(fileQuery))
+  );
+
+  // Update selection tracking: Remove IDs of files that no longer exist
+  const currentRecIds = recs.map(r=>r.id);
+  selectedFiles = selectedFiles.filter(id => currentRecIds.includes(id));
+  toggleFileSelection('dummy', false); // Update bulk action bar visibility and count
+
+
+  // Update badges and empty note
+  // Tính tổng file ghi âm mới (id: rec_) và file tải lên mới (id: rec_)
+  const totalRecs = recs.filter(r=>r.id.startsWith("rec_")).length;
+  // Tổng files (lib_ + rec_)
+  totalFilesBadge.textContent = recs.length; 
+  totalRecsBadge.textContent = totalRecs;
+  if(totalRecs === 0 && fileQuery === '') document.getElementById('emptyRecNote').style.display='block';
+  else document.getElementById('emptyRecNote').style.display='none';
+
+
+  // Library List (lib_ files) - Chỉ hiện các file "lib_" cũ
+  libraryEl.innerHTML = "";
+  filteredRecs.forEach(r=>{
+      if(!r.id.startsWith("lib_")) return; 
+      const isSelected = selectedFiles.includes(r.id);
+      const div = document.createElement('div');
+      div.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+      
+      div.innerHTML = `
+          <div class="form-check me-2" onclick="event.stopPropagation()">
+              <input class="form-check-input" type="checkbox" value="" id="check_${r.id}" 
+                     ${isSelected ? 'checked' : ''} 
+                     onchange="toggleFileSelection('${r.id}', this.checked)">
+          </div>
+          <span class="text-truncate flex-grow-1" style="max-width:200px">${r.name}</span> 
+          <div class="d-flex gap-1">
+             <button class="btn btn-sm btn-primary border-0" onclick="playFile('${r.id}')"><i class="bi bi-play-fill"></i></button>
+             <button class="btn btn-sm btn-success border-0" onclick="downloadFile('${r.id}','${r.name}')"><i class="bi bi-download"></i></button>
+             <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteFile('${r.id}')"><i class="bi bi-trash"></i></button>
+          </div>`;
+      libraryEl.appendChild(div);
+  });
+
+  // Recordings List (rec_ files) - Hiển thị file rec_ (bao gồm cả file ghi âm và file tải lên mới)
+  recordingsEl.innerHTML = "";
+  filteredRecs.filter(r=>r.id.startsWith("rec_")).forEach(r=>{
+    const isSelected = selectedFiles.includes(r.id);
+    const div = document.createElement('div');
+    div.className = "file-item";
+    div.innerHTML = `
+      <div class="d-flex justify-content-between align-items-start">
+        <div class="d-flex align-items-start flex-grow-1">
+            <div class="form-check me-2 mt-1" onclick="event.stopPropagation()">
+                <input class="form-check-input" type="checkbox" value="" id="check_${r.id}" 
+                       ${isSelected ? 'checked' : ''} 
+                       onchange="toggleFileSelection('${r.id}', this.checked)">
+            </div>
+            <div>
+                <div class="fw-bold text-dark">${r.name}</div>
+                <div class="small text-muted">${new Date(r.created).toLocaleString()}</div>
+                <div class="small text-info fst-italic"><i class="bi bi-sticky"></i> ${r.note}</div>
+            </div>
+        </div>
+        <div class="dropdown">
+          <button class="btn btn-sm btn-light" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
+          <ul class="dropdown-menu">
+             <li><a class="dropdown-item" href="#" onclick="renameFile('${r.id}','${r.name}')">Đổi tên</a></li>
+             <li><a class="dropdown-item" href="#" onclick="noteFile('${r.id}')">Ghi chú</a></li>
+             <li><hr class="dropdown-divider"></li>
+             <li><a class="dropdown-item text-danger" href="#" onclick="deleteFile('${r.id}')">Xóa</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="file-actions">
+         <button class="btn btn-sm btn-primary flex-grow-1" onclick="playFile('${r.id}')"><i class="bi bi-play-fill"></i> Nghe</button>
+         <button class="btn btn-sm btn-warning" onclick="renameFile('${r.id}','${r.name}')" title="Đổi tên"><i class="bi bi-pencil"></i></button>
+         <button class="btn btn-sm btn-success" onclick="downloadFile('${r.id}','${r.name}')" title="Tải xuống"><i class="bi bi-download"></i></button>
+      </div>
+    `;
+    recordingsEl.appendChild(div);
+  });
+}
+
+// === FILE ACTIONS WRAPPERS (Expose to window) ===
+window.toggleFileSelection = toggleFileSelection;
+window.bulkDeleteFiles = bulkDeleteFiles;
+window.bulkDownloadFiles = bulkDownloadFiles;
+
+window.deleteFile = async(id)=>{
+    if(confirm("Bạn chắc chắn muốn xóa file này?")){
+        await deleteRec(id);
+        await refreshLibraryAndRecordings();
+    }
+};
+window.renameFile = async(id, oldName)=>{
+    const r = (await getAllRecs()).find(x=>x.id==id);
+    if(r){
+        const n = prompt("Tên mới:", oldName);
+        if(n){ r.name = n; await putRec(r); await refreshLibraryAndRecordings(); }
+    }
+};
+window.noteFile = async(id)=>{
+    const r = (await getAllRecs()).find(x=>x.id==id);
+    if(r){
+        const n = prompt("Ghi chú:", r.note || "");
+        if(n!==null){ r.note = n; await putRec(r); await refreshLibraryAndRecordings(); }
+    }
+};
+window.downloadFile = async(id, name)=>{
+    const r = (await getAllRecs()).find(x=>x.id==id);
+    if(r){
+        const url = URL.createObjectURL(r.blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = name; a.click();
+    }
+};
+window.playFile = async(id)=>{
+    const r = (await getAllRecs()).find(x=>x.id==id);
+    if(!r) return;
+    
+    // Tắt hết các kênh radio đang phát và file đang phát
+    Object.keys(players).forEach(k=> stopChannel(k));
+    
+    const filePlayerKey = 'file_playback_unique'; // Key duy nhất cho player file
+    
+    const url = URL.createObjectURL(r.blob);
+    
+    // 1. Tạo Player Audio
+    const audio = document.createElement('audio');
+    audio.controls = true; audio.src = url; audio.autoplay = true; audio.crossOrigin = 'anonymous';
+    
+    // 2. Tạo giao diện Player đang phát
+    const box = document.createElement('div');
+    box.className = "active-player-box shadow";
+    box.id = "player_box_"+filePlayerKey; 
+
+    box.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <div class="fw-bold"><i class="bi bi-file-music"></i> ${r.name}</div>
+                <div class="small opacity-50 text-light">Đang nghe lại...</div>
+            </div>
+            <button class="btn btn-sm btn-outline-light rounded-pill px-3" id="p_close_${filePlayerKey}">Đóng</button> 
+        </div>
+    `;
+    box.appendChild(audio);
+
+    // 3. Thêm vào khu vực Player Area (xóa các box khác)
+    playerArea.innerHTML = "";
+    playerArea.appendChild(box);
+    
+    // 4. Thêm vào đối tượng players tạm thời
+    players[filePlayerKey] = {
+        audio, source: url, isRecording: false, chunks: [], mediaRecorder: null,
+        key: filePlayerKey, recordSeconds: 0, recordTimer: null, timerUiEl: null
+    };
+
+    // 5. Nút đóng nhanh
+    document.getElementById(`p_close_${filePlayerKey}`).onclick = ()=>{
+        stopChannel(filePlayerKey); 
+    };
+
+    // Khi file kết thúc, tự đóng
+    audio.onended = () => {
+        stopChannel(filePlayerKey);
+    };
+
+    log(`Đang nghe lại: ${r.name}`);
+    updateActiveChannelsUI();
+};
+
+window.filterChannels = filterChannels; // Expose filter function
+
+// === DATE AND TIME LOGIC (NEW) ===
+function getVietnameseDay(dayIndex) {
+    const days = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+    return days[dayIndex];
+}
+
+function updateDateTime() {
+    const now = new Date();
+    
+    // Format Date: Thứ, Ngày/Tháng/Năm
+    const dayName = getVietnameseDay(now.getDay());
+    const date = now.getDate().toString().padStart(2, '0');
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const year = now.getFullYear();
+    const formattedDate = `${dayName}, ${date}/${month}/${year}`;
+    
+    // Format Time: HH:MM:SS
+    const time = now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+    
+    const dateEl = document.getElementById('currentDate');
+    const timeEl = document.getElementById('currentTime');
+    
+    if (dateEl) {
+        dateEl.textContent = formattedDate;
+    }
+    if (timeEl) {
+        timeEl.textContent = time;
+    }
+}
+// === END DATE AND TIME LOGIC ===
+
+(async()=>{
+  await openDB();
+  await refreshLibraryAndRecordings();
+  updateActiveChannelsUI();
+  
+  // Tải theme đã lưu
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.body.setAttribute('data-theme', savedTheme);
+  const themeSelector = document.getElementById('themeSelector');
+  if(themeSelector) themeSelector.value = savedTheme;
+  setTheme(savedTheme); // Cập nhật các thành phần UI đặc biệt
+  
+  // Initialize and start time update
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+  
+  log("Ứng dụng sẵn sàng.");
+})();
+</script>
+</body>
+</html>
