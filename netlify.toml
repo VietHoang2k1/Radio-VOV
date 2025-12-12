@@ -1,0 +1,15 @@
+# === Cấu hình Bảo vệ bằng Mật khẩu (Basic Auth) ===
+# Tên người dùng và mật khẩu được mã hóa trong chuỗi Base64
+[[redirects]]
+  from = "/*"
+  to = "/*"
+  status = 401
+  force = true
+  headers = {Authorization = ["Basic CHUỖI_BASE64_CỦA_BẠN"]}
+
+# === Cấu hình Cho phép truy cập và fix lỗi 404 (Quan trọng) ===
+# Quy tắc này chuyển hướng mọi lỗi không tìm thấy file về index.html (đã sửa lỗi 404)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
